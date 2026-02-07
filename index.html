@@ -1,133 +1,158 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Progres Santri</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Progres Santri</title>
 
-<style>
-body{
-    font-family: Arial, sans-serif;
-    background:#f4f6f9;
-    margin:0;
-    padding:10px;
-}
-h2{text-align:center}
-input,button{
-    width:100%;
-    padding:10px;
-    margin:5px 0;
-    font-size:16px;
-}
-button{
-    background:#28a745;
-    border:none;
-    color:white;
-    border-radius:5px;
-}
-table{
-    width:100%;
-    border-collapse:collapse;
-    margin-top:10px;
-}
-th,td{
-    border:1px solid #ccc;
-    padding:6px;
-    font-size:14px;
-    text-align:center;
-}
-th{
-    background:#007bff;
-    color:white;
-}
-</style>
-</head>
-
-<body>
-
-<h2>📊 Progres Santri</h2>
-
-<form id="form">
-    <input type="text" id="nama" placeholder="Nama Santri" required>
-    <input type="text" id="kelas" placeholder="Kelas" required>
-    <input type="text" id="hafalan" placeholder="Hafalan" required>
-    <button type="submit">💾 Simpan Data</button>
-</form>
-
-<table>
-<thead>
-<tr>
-    <th>No</th>
-    <th>Nama</th>
-    <th>Kelas</th>
-    <th>Hafalan</th>
-</tr>
-</thead>
-<tbody id="data"></tbody>
-</table>
+  <style>
+    body{font-family:Arial;margin:10px;background:#f3f4f6}
+    h2{text-align:center}
+    input,select,textarea,button{
+      width:100%;
+      padding:8px;
+      margin:5px 0;
+      border-radius:6px;
+      border:1px solid #ccc;
+      font-size:14px;
+    }
+    button{
+      background:#1e40af;
+      color:white;
+      border:none;
+      cursor:pointer;
+    }
+    button:hover{opacity:.9}
+    table{
+      width:100%;
+      border-collapse:collapse;
+      background:white;
+      margin-top:10px;
+    }
+    th,td{
+      border:1px solid #ccc;
+      padding:6px;
+      text-align:center;
+    }
+    th{background:#1e40af;color:white}
+  </style>
 
 <script>
-// GANTI DENGAN URL APPS SCRIPT ANDA
 const API = "https://script.google.com/macros/s/AKfycbxMAnqlTJlKF_42jAPFw8hqXUx6rHPGA_wOWY3X9dE--00Al1R91SwQyIrOEOSB5gd3/exec";
 
-// Ambil Data
-async function loadData(){
-    try{
-        const res = await fetch(API);
-        const data = await res.json();
+let kategori = "Tahfidz";
 
-        let html = "";
-        data.forEach((row,i)=>{
-            html += `<tr>
-                <td>${i+1}</td>
-                <td>${row.nama}</td>
-                <td>${row.kelas}</td>
-                <td>${row.hafalan}</td>
-            </tr>`;
-        });
-
-        document.getElementById("data").innerHTML = html;
-
-    }catch(e){
-        alert("Gagal mengambil data");
-        console.log(e);
-    }
+function setKategori(k){
+  kategori = k;
+  loadData();
 }
 
-// Simpan Data
-document.getElementById("form").addEventListener("submit", async function(e){
-    e.preventDefault();
+function loadData(){
+  fetch(`${API}?action=get&kategori=${kategori}`)
+    .then(r=>r.json())
+    .then(showData)
+    .catch(e=>alert("Gagal ambil data"));
+}
 
-    let formData = new FormData();
-    formData.append("action","add");
-    formData.append("nama",nama.value);
-    formData.append("kelas",kelas.value);
-    formData.append("hafalan",hafalan.value);
+function showData(data){
+  let html = "<tr>";
+  if(!data.length){
+    document.getElementById("tabel").innerHTML = "<tr><td>Data kosong</td></tr>";
+    return;
+  }
 
-    try{
-        const res = await fetch(API,{
-            method:"POST",
-            body:formData
-        });
+  Object.keys(data[0]).filter(x=>x!="rowIndex").forEach(h=>{
+    html += `<th>${h}</th>`;
+  });
+  html += "<th>Aksi</th></tr>";
 
-        const result = await res.json();
+  data.forEach(r=>{
+    html+="<tr>";
+    Object.keys(r).filter(x=>x!="rowIndex").forEach(k=>{
+      html+=`<td>${r[k]}</td>`;
+    });
+    html+=`<td><button onclick="hapus(${r.rowIndex})">Hapus</button></td></tr>`;
+  });
 
-        if(result.status=="OK"){
-            alert("Data berhasil disimpan");
-            form.reset();
-            loadData();
-        }else{
-            alert("Gagal menyimpan data");
-        }
+  document.getElementById("tabel").innerHTML = html;
+}
 
-    }catch(e){
-        alert("Error kirim data");
-        console.log(e);
-    }
-});
+function simpan(){
+  let data = {
+    kategori:kategori,
+    nama:val("nama"),
+    surah:val("surah"),
+    dariAyat:val("dari"),
+    sampaiAyat:val("sampai"),
+    namaKitab:val("kitab"),
+    jumlah:val("jumlah"),
+    namaProgres:val("progres"),
+    jenis:val("jenis"),
+    keterangan:val("ket")
+  };
 
-loadData();
+  fetch(API+"?action=add",{
+    method:"POST",
+    body:JSON.stringify(data)
+  })
+  .then(r=>r.json())
+  .then(res=>{
+    alert(res.message || "Tersimpan");
+    loadData();
+  })
+  .catch(()=>alert("Gagal simpan data"));
+}
+
+function hapus(row){
+  if(!confirm("Hapus data?")) return;
+  fetch(`${API}?action=delete&kategori=${kategori}&row=${row}`)
+    .then(r=>r.json())
+    .then(()=>loadData());
+}
+
+function val(id){
+  return document.getElementById(id).value;
+}
+
+window.onload=loadData;
 </script>
+
+</head>
+<body>
+
+<h2>📘 Progres Santri</h2>
+
+<select onchange="setKategori(this.value)">
+  <option value="Tahfidz">Tahfidz</option>
+  <option value="Kitab">Kitab</option>
+  <option value="Lainnya">Lainnya</option>
+</select>
+
+<input id="nama" placeholder="Nama Santri">
+
+<div id="tahfidz">
+  <input id="surah" placeholder="Surah">
+  <input id="dari" placeholder="Dari Ayat">
+  <input id="sampai" placeholder="Sampai Ayat">
+</div>
+
+<div id="kitab">
+  <input id="kitab" placeholder="Nama Kitab">
+  <input id="jumlah" placeholder="Jumlah">
+</div>
+
+<div id="lainnya">
+  <input id="progres" placeholder="Nama Progres">
+  <input id="jenis" placeholder="Jenis">
+</div>
+
+<textarea id="ket" placeholder="Keterangan"></textarea>
+
+<button onclick="simpan()">💾 Simpan</button>
+
+<table>
+  <tbody id="tabel"></tbody>
+</table>
 
 </body>
 </html>
