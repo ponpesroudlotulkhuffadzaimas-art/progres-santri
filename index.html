@@ -6,162 +6,138 @@
 <title>Progres Santri</title>
 
 <style>
-body{font-family:Arial;background:#f1f5f9;margin:10px}
-h2{text-align:center}
-.card{background:#fff;padding:12px;border-radius:10px;box-shadow:0 2px 4px rgba(0,0,0,.1)}
-input,select,textarea,button{
-  width:100%;padding:8px;margin:6px 0;border-radius:6px;border:1px solid #ccc;font-size:14px
-}
-button{background:#1e40af;color:#fff;border:none;font-weight:bold}
-table{width:100%;border-collapse:collapse;margin-top:10px;background:#fff}
-th,td{border:1px solid #ccc;padding:6px;text-align:center}
-th{background:#1e40af;color:#fff}
+body{font-family:Arial;background:#f5f5f5;margin:0}
+header{background:#1e88e5;color:white;padding:12px;text-align:center}
+.container{padding:15px}
+input,select,button{width:100%;padding:10px;margin-top:5px;margin-bottom:10px;font-size:15px}
+button{background:#1e88e5;color:white;border:none;border-radius:5px}
+table{width:100%;border-collapse:collapse;margin-top:10px;background:white}
+th,td{border:1px solid #ccc;padding:6px;font-size:13px;text-align:center}
+th{background:#1976d2;color:white}
+.loading{display:none;text-align:center;padding:10px}
 </style>
 
+</head>
+
+<body>
+
+<header>
+<h3>Catatan Progres Santri</h3>
+</header>
+
+<div class="container">
+
+<div class="loading" id="loading">⏳ Memuat data...</div>
+
+<input type="text" id="nama" placeholder="Nama Santri">
+<select id="kelas">
+<option value="">Pilih Kelas</option>
+<option>1</option>
+<option>2</option>
+<option>3</option>
+<option>4</option>
+<option>5</option>
+<option>6</option>
+</select>
+<input type="text" id="hafalan" placeholder="Hafalan / Progres">
+
+<button onclick="simpan()">Simpan</button>
+
+<table>
+<thead>
+<tr>
+<th>No</th>
+<th>Nama</th>
+<th>Kelas</th>
+<th>Progres</th>
+<th>Tanggal</th>
+</tr>
+</thead>
+<tbody id="data"></tbody>
+</table>
+
+</div>
+
 <script>
-const API = "URL_API_ANDA";
-let kategori = "Tahfidz";
 
-function setKategori(v){
-  kategori = v;
-  tampilForm();
-  loadData();
+const URL_API = "GANTI_DENGAN_URL_WEB_APP_ANDA";
+
+function showLoading(v){
+  document.getElementById('loading').style.display = v ? 'block' : 'none';
 }
 
-function tampilForm(){
-  document.getElementById("formTahfidz").style.display = kategori==="Tahfidz"?"block":"none";
-  document.getElementById("formKitab").style.display   = kategori==="Kitab"?"block":"none";
-  document.getElementById("formLain").style.display    = kategori==="Lainnya"?"block":"none";
+async function loadData(){
+  showLoading(true);
+  try{
+    const res = await fetch(URL_API + "?action=get");
+    const json = await res.json();
+
+    let html = "";
+    json.data.forEach((d,i)=>{
+      html += `<tr>
+        <td>${i+1}</td>
+        <td>${d.nama}</td>
+        <td>${d.kelas}</td>
+        <td>${d.hafalan}</td>
+        <td>${d.tanggal}</td>
+      </tr>`;
+    });
+
+    document.getElementById('data').innerHTML = html;
+  }catch(e){
+    alert("Gagal mengambil data");
+    console.error(e);
+  }
+  showLoading(false);
 }
 
-function loadData(){
-  fetch(`${API}?action=get&kategori=${kategori}`)
-    .then(r=>r.json())
-    .then(tampilTabel)
-    .catch(()=>alert("Gagal mengambil data"));
-}
+async function simpan(){
+  const nama = document.getElementById("nama").value;
+  const kelas = document.getElementById("kelas").value;
+  const hafalan = document.getElementById("hafalan").value;
 
-function tampilTabel(data){
-  let html="<tr>";
-
-  if(!data.length){
-    document.getElementById("tabel").innerHTML="<tr><td>Data kosong</td></tr>";
+  if(!nama || !kelas || !hafalan){
+    alert("Lengkapi data!");
     return;
   }
 
-  Object.keys(data[0]).filter(x=>x!="rowIndex").forEach(h=>html+=`<th>${h}</th>`);
-  html+="<th>Aksi</th></tr>";
+  showLoading(true);
 
-  data.forEach(r=>{
-    html+="<tr>";
-    Object.keys(r).filter(x=>x!="rowIndex").forEach(k=>html+=`<td>${r[k]}</td>`);
-    html+=`<td><button onclick="hapus(${r.rowIndex})">Hapus</button></td></tr>`;
-  });
+  try{
+    const res = await fetch(URL_API, {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({
+        action: "add",
+        nama: nama,
+        kelas: kelas,
+        hafalan: hafalan
+      })
+    });
 
-  document.getElementById("tabel").innerHTML=html;
-}
+    const json = await res.json();
 
-function simpanTahfidz(){
-  let q = `?action=add&kategori=Tahfidz`+
-    `&nama=${v("t_nama")}`+
-    `&surah=${v("t_surah")}`+
-    `&dariAyat=${v("t_dari")}`+
-    `&sampaiAyat=${v("t_sampai")}`+
-    `&keterangan=${v("t_ket")}`;
-
-  kirim(q);
-}
-
-function simpanKitab(){
-  let q = `?action=add&kategori=Kitab`+
-    `&nama=${v("k_nama")}`+
-    `&namaKitab=${v("k_kitab")}`+
-    `&jumlah=${v("k_jumlah")}`+
-    `&keterangan=${v("k_ket")}`;
-
-  kirim(q);
-}
-
-function simpanLain(){
-  let q = `?action=add&kategori=Lainnya`+
-    `&namaProgres=${v("l_progres")}`+
-    `&nama=${v("l_nama")}`+
-    `&jenis=${v("l_jenis")}`+
-    `&keterangan=${v("l_ket")}`;
-
-  kirim(q);
-}
-
-function kirim(q){
-  fetch(API+q)
-    .then(r=>r.json())
-    .then(res=>{
-      alert(res.message || "Data tersimpan");
+    if(json.status=="OK"){
+      alert("Data berhasil disimpan");
+      document.getElementById("nama").value="";
+      document.getElementById("kelas").value="";
+      document.getElementById("hafalan").value="";
       loadData();
-    })
-    .catch(()=>alert("Gagal menyimpan data"));
+    }else{
+      alert("Gagal menyimpan");
+    }
+
+  }catch(e){
+    alert("Error simpan data");
+    console.error(e);
+  }
+
+  showLoading(false);
 }
 
-function hapus(row){
-  if(!confirm("Hapus data?")) return;
-  fetch(`${API}?action=delete&kategori=${kategori}&row=${row}`)
-    .then(r=>r.json())
-    .then(()=>loadData());
-}
+loadData();
 
-function v(id){ return encodeURIComponent(document.getElementById(id).value); }
-
-window.onload = () => {
-  tampilForm();
-  loadData();
-}
 </script>
-
-</head>
-<body>
-
-<h2>📘 PROGRES SANTRI</h2>
-
-<div class="card">
-<select onchange="setKategori(this.value)">
-  <option value="Tahfidz">Tahfidz</option>
-  <option value="Kitab">Kitab</option>
-  <option value="Lainnya">Lainnya</option>
-</select>
-
-<!-- FORM TAHFIDZ -->
-<div id="formTahfidz">
-  <input id="t_nama" placeholder="Nama Santri">
-  <input id="t_surah" placeholder="Surah">
-  <input id="t_dari" placeholder="Dari Ayat">
-  <input id="t_sampai" placeholder="Sampai Ayat">
-  <textarea id="t_ket" placeholder="Keterangan"></textarea>
-  <button onclick="simpanTahfidz()">Simpan Tahfidz</button>
-</div>
-
-<!-- FORM KITAB -->
-<div id="formKitab" style="display:none">
-  <input id="k_nama" placeholder="Nama Santri">
-  <input id="k_kitab" placeholder="Nama Kitab">
-  <input id="k_jumlah" placeholder="Jumlah">
-  <textarea id="k_ket" placeholder="Keterangan"></textarea>
-  <button onclick="simpanKitab()">Simpan Kitab</button>
-</div>
-
-<!-- FORM LAINNYA -->
-<div id="formLain" style="display:none">
-  <input id="l_progres" placeholder="Nama Progres">
-  <input id="l_nama" placeholder="Nama Santri">
-  <input id="l_jenis" placeholder="Jenis">
-  <textarea id="l_ket" placeholder="Keterangan"></textarea>
-  <button onclick="simpanLain()">Simpan Lainnya</button>
-</div>
-
-</div>
-
-<table>
-<tbody id="tabel"></tbody>
-</table>
 
 </body>
 </html>
