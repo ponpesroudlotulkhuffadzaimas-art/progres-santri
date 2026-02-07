@@ -1,69 +1,110 @@
-function doGet(e) {
-  const action = e.parameter.action || "";
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Progres Santri</title>
 
-  if (action == "stat") return json(getStatistik());
-  if (action == "get") return json(getData(e.parameter.kategori));
-  if (action == "add") return json(addData(e.parameter.kategori, e.parameter));
+<style>
+body{font-family:Arial;margin:0;background:#f3f4f6}
+header{background:#1e40af;color:#fff;padding:15px;text-align:center}
+.card{background:#fff;margin:10px;padding:15px;border-radius:10px}
+input,select,button{width:100%;padding:10px;margin:5px 0}
+button{background:#1e40af;color:#fff;border:0;border-radius:5px;font-size:16px}
+table{width:100%;border-collapse:collapse;margin-top:10px}
+th,td{border:1px solid #ccc;padding:6px}
+th{background:#1e40af;color:white}
+</style>
 
-  return json({ status: "OK", message: "API Aktif" });
-}
+</head>
+<body>
 
-function json(data) {
-  return ContentService
-    .createTextOutput(JSON.stringify(data))
-    .setMimeType(ContentService.MimeType.JSON)
-    .setHeader("Access-Control-Allow-Origin", "*");
-}
+<header>
+<h2>📘 Progres Santri</h2>
+</header>
 
-// ===== DATA =====
+<div class="card">
+<b>Tambah Data</b>
 
-function getSheet(name) {
-  const ss = SpreadsheetApp.getActive();
-  let sh = ss.getSheetByName(name);
-  if (!sh) {
-    sh = ss.insertSheet(name);
-    if (name == "Tahfidz")
-      sh.appendRow(["ID","Nama","Surah","Dari","Sampai","Ket"]);
-    if (name == "Kitab")
-      sh.appendRow(["ID","Nama","Kitab","Jumlah","Ket"]);
-    if (name == "Lainnya")
-      sh.appendRow(["ID","Progres","Nama","Jenis","Ket"]);
-  }
-  return sh;
-}
+<select id="kategori">
+  <option value="Tahfidz">Tahfidz</option>
+  <option value="Kitab">Kitab</option>
+  <option value="Lainnya">Lainnya</option>
+</select>
 
-function getData(kategori) {
-  const sh = getSheet(kategori);
-  const data = sh.getDataRange().getValues();
-  const head = data.shift();
+<input id="nama" placeholder="Nama Santri">
 
-  return data.map(r => {
-    let o = {};
-    head.forEach((h,i)=>o[h]=r[i]);
-    return o;
+<input id="surah" placeholder="Surah / Kitab / Progres">
+<input id="dari" placeholder="Dari Ayat">
+<input id="sampai" placeholder="Sampai Ayat / Jumlah">
+<input id="ket" placeholder="Keterangan">
+
+<button onclick="simpan()">💾 Simpan</button>
+</div>
+
+<div class="card">
+<b>Data Tahfidz</b>
+<div id="tahfidz">Memuat...</div>
+</div>
+
+<script>
+const API = "https://script.google.com/macros/s/AKfycbxMAnqlTJlKF_42jAPFw8hqXUx6rHPGA_wOWY3X9dE--00Al1R91SwQyIrOEOSB5gd3/exec";
+
+function simpan(){
+  let kategori = kategori.value;
+
+  let params = new URLSearchParams({
+    action: "add",
+    kategori: kategori,
+    nama: nama.value,
+    surah: surah.value,
+    dariAyat: dari.value,
+    sampaiAyat: sampai.value,
+    keterangan: ket.value
   });
+
+  fetch(API + "?" + params)
+    .then(r => r.json())
+    .then(res => {
+      alert("Data berhasil disimpan");
+      loadData();
+    })
+    .catch(err => alert("Gagal: " + err));
 }
 
-function addData(kategori, p) {
-  const sh = getSheet(kategori);
-  const id = Utilities.getUuid();
-
-  if (kategori == "Tahfidz")
-    sh.appendRow([id,p.nama,p.surah,p.dari,p.sampai,p.ket]);
-
-  if (kategori == "Kitab")
-    sh.appendRow([id,p.nama,p.kitab,p.jumlah,p.ket]);
-
-  if (kategori == "Lainnya")
-    sh.appendRow([id,p.progres,p.nama,p.jenis,p.ket]);
-
-  return {success:true};
+function loadData(){
+  fetch(API + "?action=get&kategori=Tahfidz")
+    .then(r => r.json())
+    .then(data => render(data))
+    .catch(err => document.getElementById("tahfidz").innerHTML = "Gagal load");
 }
 
-function getStatistik() {
-  return {
-    tahfidz: getSheet("Tahfidz").getLastRow()-1,
-    kitab: getSheet("Kitab").getLastRow()-1,
-    lainnya: getSheet("Lainnya").getLastRow()-1
+function render(data){
+  if (!data.length) {
+    document.getElementById("tahfidz").innerHTML = "Belum ada data";
+    return;
   }
+
+  let html = "<table><tr>";
+  Object.keys(data[0]).filter(k => k != "rowIndex").forEach(k => {
+    html += "<th>"+k+"</th>";
+  });
+  html += "</tr>";
+
+  data.forEach(r => {
+    html += "<tr>";
+    Object.keys(r).filter(k => k != "rowIndex").forEach(k => {
+      html += "<td>"+(r[k]||"")+"</td>";
+    });
+    html += "</tr>";
+  });
+
+  html += "</table>";
+  document.getElementById("tahfidz").innerHTML = html;
 }
+
+loadData();
+</script>
+
+</body>
+</html>
