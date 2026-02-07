@@ -1,65 +1,1270 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Input & Data Santri</title>
-
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Progres Hafalan</title>
   <style>
-    body{font-family:Arial; padding:15px}
-    input,button{width:100%; padding:10px; margin:5px 0}
-    table{width:100%; border-collapse:collapse; margin-top:15px}
-    th,td{border:1px solid #999; padding:8px; text-align:left}
-    th{background:#eee}
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+      color: white;
+      padding: 30px;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+
+    .header p {
+      opacity: 0.9;
+      font-size: 14px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+      padding: 20px;
+      background: #f8fafc;
+      border-bottom: 2px solid #e5e7eb;
+    }
+
+    .stat-card {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .stat-card .number {
+      font-size: 32px;
+      font-weight: bold;
+      color: #1e40af;
+    }
+
+    .stat-card .label {
+      font-size: 12px;
+      color: #6b7280;
+      margin-top: 5px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .tabs {
+      display: flex;
+      background: #f1f5f9;
+      border-bottom: 2px solid #e5e7eb;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 15px 20px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 500;
+      color: #64748b;
+      transition: all 0.3s;
+      border-bottom: 3px solid transparent;
+    }
+
+    .tab:hover {
+      background: #e2e8f0;
+      color: #1e40af;
+    }
+
+    .tab.active {
+      background: white;
+      color: #1e40af;
+      border-bottom-color: #1e40af;
+    }
+
+    .content {
+      padding: 25px;
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .action-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.3s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: #1e40af;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #1e3a8a;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
+    }
+
+    .btn-success {
+      background: #059669;
+      color: white;
+    }
+
+    .btn-success:hover {
+      background: #047857;
+    }
+
+    .btn-danger {
+      background: #dc2626;
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: #b91c1c;
+    }
+
+    .btn-secondary {
+      background: #6b7280;
+      color: white;
+    }
+
+    .btn-secondary:hover {
+      background: #4b5563;
+    }
+
+    .btn-small {
+      padding: 6px 12px;
+      font-size: 12px;
+    }
+
+    .search-box {
+      display: flex;
+      gap: 10px;
+      flex: 1;
+      max-width: 300px;
+    }
+
+    .search-box input {
+      flex: 1;
+      padding: 12px 15px;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: border-color 0.3s;
+    }
+
+    .search-box input:focus {
+      outline: none;
+      border-color: #1e40af;
+    }
+
+    .table-container {
+      overflow-x: auto;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+    }
+
+    thead {
+      background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+      color: white;
+    }
+
+    th, td {
+      padding: 15px;
+      text-align: left;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    th {
+      font-weight: 600;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    tbody tr:hover {
+      background: #f8fafc;
+    }
+
+    tbody tr:nth-child(even) {
+      background: #f9fafb;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #9ca3af;
+    }
+
+    .empty-state .icon {
+      font-size: 64px;
+      margin-bottom: 20px;
+    }
+
+    .empty-state p {
+      font-size: 16px;
+    }
+
+    /* Modal Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      border-radius: 15px;
+      width: 100%;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateY(-50px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .modal-header {
+      background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+      color: white;
+      padding: 20px 25px;
+      border-radius: 15px 15px 0 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-header h2 {
+      font-size: 20px;
+    }
+
+    .close-btn {
+      background: rgba(255,255,255,0.2);
+      border: none;
+      color: white;
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.3s;
+    }
+
+    .close-btn:hover {
+      background: rgba(255,255,255,0.3);
+    }
+
+    .modal-body {
+      padding: 25px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: #374151;
+      font-size: 14px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px 15px;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 14px;
+      font-family: inherit;
+      transition: border-color 0.3s;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #1e40af;
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    .autocomplete-container {
+      position: relative;
+    }
+
+    .autocomplete-suggestions {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border: 2px solid #e5e7eb;
+      border-top: none;
+      border-radius: 0 0 8px 8px;
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 100;
+      display: none;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    .autocomplete-suggestions.active {
+      display: block;
+    }
+
+    .suggestion-item {
+      padding: 12px 15px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .suggestion-item:hover {
+      background: #f3f4f6;
+    }
+
+    .modal-footer {
+      padding: 20px 25px;
+      background: #f8fafc;
+      border-top: 1px solid #e5e7eb;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      border-radius: 0 0 15px 15px;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #1e40af;
+      color: white;
+      padding: 15px 25px;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      z-index: 2000;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.3s;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .toast.success {
+      background: #059669;
+    }
+
+    .toast.error {
+      background: #dc2626;
+    }
+
+    /* Loading Overlay */
+    .loading {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255,255,255,0.9);
+      z-index: 3000;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+
+    .loading.active {
+      display: flex;
+    }
+
+    .spinner {
+      width: 50px;
+      height: 50px;
+      border: 4px solid #e5e7eb;
+      border-top-color: #1e40af;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .loading p {
+      margin-top: 15px;
+      color: #6b7280;
+      font-size: 16px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+
+      .tabs {
+        flex-direction: column;
+      }
+
+      .tab {
+        border-bottom: 1px solid #e5e7eb;
+        text-align: left;
+      }
+
+      .tab.active {
+        border-left: 4px solid #1e40af;
+        border-bottom-color: #e5e7eb;
+      }
+
+      .action-bar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .search-box {
+        max-width: 100%;
+      }
+    }
+
+    @media print {
+      body {
+        background: white;
+        padding: 0;
+      }
+
+      .container {
+        box-shadow: none;
+      }
+
+      .no-print {
+        display: none !important;
+      }
+    }
   </style>
 </head>
 <body>
+  <div class="container">
+    <div class="header">
+      <h1>Progres Hafalan Santri</h1>
+      <p>Sistem Tracking Hafalan dan Kitab Santri</p>
+    </div>
 
-<h3>INPUT DATA SANTRI</h3>
+    <div class="stats">
+      <div class="stat-card">
+        <div class="number" id="stat-tahfidz">0</div>
+        <div class="label">Tahfidz</div>
+      </div>
+      <div class="stat-card">
+        <div class="number" id="stat-kitab">0</div>
+        <div class="label">Kitab</div>
+      </div>
+      <div class="stat-card">
+        <div class="number" id="stat-lainnya">0</div>
+        <div class="label">Lainnya</div>
+      </div>
+      <div class="stat-card">
+        <div class="number" id="stat-santri">0</div>
+        <div class="label">Total Santri</div>
+      </div>
+    </div>
 
-<input id="nama" placeholder="Nama Santri">
-<input id="kelas" placeholder="Kelas">
-<button onclick="simpan()">SIMPAN DATA</button>
+    <div class="tabs">
+      <button class="tab active" data-tab="tahfidz">📖 Tahfidz</button>
+      <button class="tab" data-tab="kitab">📕 Kitab</button>
+      <button class="tab" data-tab="lainnya">📝 Lainnya</button>
+    </div>
 
-<hr>
+    <div class="content">
+      <!-- Tahfidz Tab -->
+      <div class="tab-content active" id="tahfidz-tab">
+        <div class="action-bar no-print">
+          <button class="btn btn-primary" onclick="openModal('tahfidz')">
+            ➕ Tambah Setoran
+          </button>
+          <div class="search-box">
+            <input type="text" id="tahfidz-search" placeholder="🔍 Cari data..." onkeyup="filterTable('tahfidz')">
+          </div>
+          <button class="btn btn-success" onclick="printData('Tahfidz')">
+            🖨️ Cetak
+          </button>
+        </div>
+        <div class="table-container">
+          <table id="tahfidz-table">
+            <thead>
+              <tr>
+                <th>No</th>
+                <th>Nama</th>
+                <th>Surah</th>
+                <th>Ayat</th>
+                <th>Keterangan</th>
+                <th class="no-print">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="tahfidz-tbody"></tbody>
+          </table>
+        </div>
+      </div>
 
-<h3>DATA SANTRI</h3>
-<button onclick="loadData()">REFRESH DATA</button>
+      <!-- Kitab Tab -->
+      <div class="tab-content" id="kitab-tab">
+        <div class="action-bar no-print">
+          <button class="btn btn-primary" onclick="openModal('kitab')">
+            ➕ Tambah Setoran
+          </button>
+          <div class="search-box">
+            <input type="text" id="kitab-search" placeholder="🔍 Cari data..." onkeyup="filterTable('kitab')">
+          </div>
+          <button class="btn btn-success" onclick="printData('Kitab')">
+            🖨️ Cetak
+          </button>
+        </div>
+        <div class="table-container">
+          <table id="kitab-table">
+            <thead>
+              <tr>
+                <th>No</th>
+                <th>Nama</th>
+                <th>Nama Kitab</th>
+                <th>Jumlah</th>
+                <th>Keterangan</th>
+                <th class="no-print">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="kitab-tbody"></tbody>
+          </table>
+        </div>
+      </div>
 
-<table>
-<thead>
-<tr><th>Nama</th><th>Kelas</th></tr>
-</thead>
-<tbody id="tabel"></tbody>
-</table>
+      <!-- Lainnya Tab -->
+      <div class="tab-content" id="lainnya-tab">
+        <div class="action-bar no-print">
+          <button class="btn btn-primary" onclick="openModal('lainnya')">
+            ➕ Tambah Progres
+          </button>
+          <div class="search-box">
+            <input type="text" id="lainnya-search" placeholder="🔍 Cari data..." onkeyup="filterTable('lainnya')">
+          </div>
+          <button class="btn btn-success" onclick="printData('Lainnya')">
+            🖨️ Cetak
+          </button>
+        </div>
+        <div class="table-container">
+          <table id="lainnya-table">
+            <thead>
+              <tr>
+                <th>No</th>
+                <th>Nama Progres</th>
+                <th>Nama Santri</th>
+                <th>Jenis</th>
+                <th>Keterangan</th>
+                <th class="no-print">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="lainnya-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
 
-<script>
-const API = "https://script.google.com/macros/s/AKfycbxMAnqlTJlKF_42jAPFw8hqXUx6rHPGA_wOWY3X9dE--00Al1R91SwQyIrOEOSB5gd3/exec";
+  <!-- Modal Form -->
+  <div class="modal" id="form-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="modal-title">Tambah Data</h2>
+        <button class="close-btn" onclick="closeModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <form id="data-form">
+          <input type="hidden" id="form-kategori">
+          <input type="hidden" id="form-id">
+          <input type="hidden" id="form-rowIndex">
 
-function simpan(){
-  let nama = document.getElementById("nama").value;
-  let kelas = document.getElementById("kelas").value;
+          <!-- Tahfidz Form -->
+          <div id="tahfidz-form" style="display: none;">
+            <div class="form-group">
+              <label>Nama Santri *</label>
+              <div class="autocomplete-container">
+                <input type="text" id="tahfidz-nama" required placeholder="Ketik nama santri..." oninput="showAutocomplete('tahfidz', this.value)">
+                <div class="autocomplete-suggestions" id="tahfidz-suggestions"></div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Surah *</label>
+              <input type="text" id="tahfidz-surah" required placeholder="Contoh: Al-Baqarah">
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Dari Ayat *</label>
+                <input type="number" id="tahfidz-dariAyat" required placeholder="1">
+              </div>
+              <div class="form-group">
+                <label>Sampai Ayat *</label>
+                <input type="number" id="tahfidz-sampaiAyat" required placeholder="10">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Keterangan</label>
+              <textarea id="tahfidz-keterangan" placeholder="Catatan tambahan..."></textarea>
+            </div>
+          </div>
 
-  fetch(API + "?action=add&nama="+encodeURIComponent(nama)+"&kelas="+encodeURIComponent(kelas))
-  .then(r=>r.json())
-  .then(d=>{
-    alert("Data tersimpan");
-    loadData();
-  });
-}
+          <!-- Kitab Form -->
+          <div id="kitab-form" style="display: none;">
+            <div class="form-group">
+              <label>Nama Santri *</label>
+              <div class="autocomplete-container">
+                <input type="text" id="kitab-nama" required placeholder="Ketik nama santri..." oninput="showAutocomplete('kitab', this.value)">
+                <div class="autocomplete-suggestions" id="kitab-suggestions"></div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Nama Kitab *</label>
+              <input type="text" id="kitab-namaKitab" required placeholder="Contoh: Jawharut Tawhid">
+            </div>
+            <div class="form-group">
+              <label>Jumlah Bait/Halaman *</label>
+              <input type="text" id="kitab-jumlah" required placeholder="Contoh: 50 bait / 10 halaman">
+            </div>
+            <div class="form-group">
+              <label>Keterangan</label>
+              <textarea id="kitab-keterangan" placeholder="Catatan tambahan..."></textarea>
+            </div>
+          </div>
 
-function loadData(){
-  fetch(API + "?action=list")
-  .then(r=>r.json())
-  .then(d=>{
-    let html="";
-    d.data.forEach(r=>{
-      html += `<tr><td>${r.nama}</td><td>${r.kelas}</td></tr>`;
+          <!-- Lainnya Form -->
+          <div id="lainnya-form" style="display: none;">
+            <div class="form-group">
+              <label>Nama Progres *</label>
+              <input type="text" id="lainnya-namaProgres" required placeholder="Contoh: Hafalan Surat Pendek">
+            </div>
+            <div class="form-group">
+              <label>Nama Santri *</label>
+              <div class="autocomplete-container">
+                <input type="text" id="lainnya-nama" required placeholder="Ketik nama santri..." oninput="showAutocomplete('Lainnya', this.value)">
+                <div class="autocomplete-suggestions" id="lainnya-suggestions"></div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Jenis *</label>
+              <select id="lainnya-jenis" required>
+                <option value="">Pilih Jenis</option>
+                <option value="Fasolatan">Fasolatan</option>
+                <option value="Surat Pendek">Surat Pendek</option>
+                <option value="Iqro'">Iqro'</option>
+                <option value="Doa Harian">Doa Harian</option>
+                <option value="Lainnya">Lainnya</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Keterangan</label>
+              <textarea id="lainnya-keterangan" placeholder="Catatan tambahan..."></textarea>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal()">Batal</button>
+        <button class="btn btn-primary" onclick="submitForm()">💾 Simpan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal" id="delete-modal">
+    <div class="modal-content" style="max-width: 400px;">
+      <div class="modal-header" style="background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);">
+        <h2>⚠️ Konfirmasi Hapus</h2>
+        <button class="close-btn" onclick="closeDeleteModal()">×</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 16px; color: #374151;">Apakah Anda yakin ingin menghapus data ini?</p>
+        <p style="font-size: 14px; color: #6b7280; margin-top: 10px;">Tindakan ini tidak dapat dibatalkan.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeDeleteModal()">Batal</button>
+        <button class="btn btn-danger" onclick="confirmDelete()">🗑️ Hapus</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <!-- Loading -->
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <p>Memuat data...</p>
+  </div>
+
+  <script>
+    // Global Variables
+    let currentKategori = 'tahfidz';
+    let deleteData = { kategori: null, rowIndex: null };
+    let dataLoadCount = 0;
+    let totalDataToLoad = 3;
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+      loadAllData();
+      setupTabs();
+      setupAutocomplete();
     });
-    document.getElementById("tabel").innerHTML = html;
-  });
-}
-</script>
 
+    // Setup Tabs
+    function setupTabs() {
+      const tabs = document.querySelectorAll('.tab');
+      tabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+          // Remove active from all tabs
+          tabs.forEach(t => t.classList.remove('active'));
+          document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+          // Add active to clicked tab
+          this.classList.add('active');
+          const tabName = this.dataset.tab;
+          document.getElementById(tabName + '-tab').classList.add('active');
+          currentKategori = tabName;
+        });
+      });
+    }
+
+    // Show Loading
+    function showLoading() {
+      console.log('Showing loading...');
+      const loadingEl = document.getElementById('loading');
+      if (loadingEl) {
+        loadingEl.classList.add('active');
+      }
+    }
+
+    // Hide Loading
+    function hideLoading() {
+      console.log('Hiding loading...');
+      const loadingEl = document.getElementById('loading');
+      if (loadingEl) {
+        loadingEl.classList.remove('active');
+      }
+    }
+
+    // Load All Data
+    function loadAllData() {
+      console.log('Memulai loadAllData...');
+      dataLoadCount = 0;
+      showLoading();
+      
+      // Load statistik
+      google.script.run
+        .withSuccessHandler(function(result) {
+          console.log('Statistik loaded:', result);
+          document.getElementById('stat-tahfidz').textContent = result.tahfidz || 0;
+          document.getElementById('stat-kitab').textContent = result.kitab || 0;
+          document.getElementById('stat-lainnya').textContent = result.lainnya || 0;
+          document.getElementById('stat-santri').textContent = result.santri || 0;
+        })
+        .withFailureHandler(function(error) {
+          console.error('Error loading statistik:', error);
+          showToast('Gagal memuat statistik', 'error');
+        })
+        .getStatistik();
+
+      // Load data untuk setiap kategori
+      loadData('Tahfidz');
+      loadData('Kitab');
+      loadData('Lainnya');
+      
+      // Fallback: pastikan loading disembunyikan setelah 10 detik
+      setTimeout(function() {
+        if (document.getElementById('loading').classList.contains('active')) {
+          console.warn('Loading timeout - memaksa hide loading');
+          hideLoading();
+        }
+      }, 10000);
+    }
+
+    // Load Data for specific category
+    function loadData(kategori) {
+      console.log('Loading data for:', kategori);
+      
+      google.script.run
+        .withSuccessHandler(function(data) {
+          console.log('Data loaded for', kategori, ':', data);
+          renderTable(kategori.toLowerCase(), data);
+          
+          // Increment counter dan cek apakah semua data sudah di-load
+          dataLoadCount++;
+          console.log('Data load progress:', dataLoadCount, '/', totalDataToLoad);
+          
+          if (dataLoadCount >= totalDataToLoad) {
+            console.log('Semua data selesai di-load');
+            hideLoading();
+          }
+        })
+        .withFailureHandler(function(error) {
+          console.error('Error loading data for', kategori, ':', error);
+          showToast('Gagal memuat data ' + kategori, 'error');
+          
+          // Tetap increment counter agar loading bisa selesai
+          dataLoadCount++;
+          if (dataLoadCount >= totalDataToLoad) {
+            hideLoading();
+          }
+        })
+        .getData(kategori);
+    }
+
+    // Render Table
+    function renderTable(kategori, data) {
+      const tbody = document.getElementById(kategori + '-tbody');
+
+      if (data.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="6">
+              <div class="empty-state">
+                <div class="icon">📭</div>
+                <p>Belum ada data</p>
+              </div>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      let html = '';
+      data.forEach((row, index) => {
+        let rowData;
+        if (kategori === 'tahfidz') {
+          rowData = `
+            <td>${index + 1}</td>
+            <td><strong>${row.Nama}</strong></td>
+            <td>${row.Surah}</td>
+            <td>${row['Dari Ayat']} - ${row['Sampai Ayat']}</td>
+            <td>${row.Keterangan || '-'}</td>
+          `;
+        } else if (kategori === 'kitab') {
+          rowData = `
+            <td>${index + 1}</td>
+            <td><strong>${row.Nama}</strong></td>
+            <td>${row['Nama Kitab']}</td>
+            <td>${row['Jumlah Bait/Halaman']}</td>
+            <td>${row.Keterangan || '-'}</td>
+          `;
+        } else if (kategori === 'lainnya') {
+          rowData = `
+            <td>${index + 1}</td>
+            <td><strong>${row['Nama Progres']}</strong></td>
+            <td>${row.Nama}</td>
+            <td>${row.Jenis}</td>
+            <td>${row.Keterangan || '-'}</td>
+          `;
+        }
+
+        html += `
+          <tr>
+            ${rowData}
+            <td class="no-print">
+              <div class="action-buttons">
+                <button class="btn btn-primary btn-small" onclick="editData('${kategori}', ${row.rowIndex})">✏️</button>
+                <button class="btn btn-danger btn-small" onclick="openDeleteModal('${kategori}', ${row.rowIndex})">🗑️</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      });
+
+      tbody.innerHTML = html;
+    }
+
+    // Filter Table
+    function filterTable(kategori) {
+      const searchTerm = document.getElementById(kategori + '-search').value.toLowerCase();
+      const table = document.getElementById(kategori + '-table');
+      const rows = table.querySelectorAll('tbody tr');
+
+      rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(searchTerm) ? '' : 'none';
+      });
+    }
+
+    // Open Modal
+    function openModal(kategori, isEdit = false) {
+      const modal = document.getElementById('form-modal');
+      const title = document.getElementById('modal-title');
+      const formKategori = document.getElementById('form-kategori');
+
+      // Show correct form
+      document.getElementById('tahfidz-form').style.display = 'none';
+      document.getElementById('kitab-form').style.display = 'none';
+      document.getElementById('lainnya-form').style.display = 'none';
+      document.getElementById(kategori + '-form').style.display = 'block';
+
+      title.textContent = isEdit ? 'Edit Data' : 'Tambah Data';
+      formKategori.value = kategori.charAt(0).toUpperCase() + kategori.slice(1);
+
+      if (!isEdit) {
+        // Reset form
+        document.getElementById('data-form').reset();
+        document.getElementById('form-id').value = '';
+        document.getElementById('form-rowIndex').value = '';
+      }
+
+      modal.classList.add('active');
+    }
+
+    // Close Modal
+    function closeModal() {
+      document.getElementById('form-modal').classList.remove('active');
+      document.querySelectorAll('.autocomplete-suggestions').forEach(s => s.classList.remove('active'));
+    }
+
+    // Edit Data
+    function editData(kategori, rowIndex) {
+      showLoading();
+      google.script.run
+        .withSuccessHandler(function(data) {
+          if (data) {
+            // Fill form
+            document.getElementById('form-kategori').value = kategori.charAt(0).toUpperCase() + kategori.slice(1);
+            document.getElementById('form-id').value = data.ID;
+            document.getElementById('form-rowIndex').value = data.rowIndex;
+
+            if (kategori === 'tahfidz') {
+              document.getElementById('tahfidz-nama').value = data.Nama;
+              document.getElementById('tahfidz-surah').value = data.Surah;
+              document.getElementById('tahfidz-dariAyat').value = data['Dari Ayat'];
+              document.getElementById('tahfidz-sampaiAyat').value = data['Sampai Ayat'];
+              document.getElementById('tahfidz-keterangan').value = data.Keterangan;
+            } else if (kategori === 'kitab') {
+              document.getElementById('kitab-nama').value = data.Nama;
+              document.getElementById('kitab-namaKitab').value = data['Nama Kitab'];
+              document.getElementById('kitab-jumlah').value = data['Jumlah Bait/Halaman'];
+              document.getElementById('kitab-keterangan').value = data.Keterangan;
+            } else if (kategori === 'lainnya') {
+              document.getElementById('lainnya-namaProgres').value = data['Nama Progres'];
+              document.getElementById('lainnya-nama').value = data.Nama;
+              document.getElementById('lainnya-jenis').value = data.Jenis;
+              document.getElementById('lainnya-keterangan').value = data.Keterangan;
+            }
+
+            openModal(kategori, true);
+          }
+          hideLoading();
+        })
+        .withFailureHandler(function(error) {
+          console.error('Error loading data for edit:', error);
+          showToast('Gagal memuat data untuk edit', 'error');
+          hideLoading();
+        })
+        .getSingleData(kategori.charAt(0).toUpperCase() + kategori.slice(1), rowIndex);
+    }
+
+    // Submit Form
+    function submitForm() {
+      const kategori = document.getElementById('form-kategori').value;
+      const id = document.getElementById('form-id').value;
+      const rowIndex = document.getElementById('form-rowIndex').value;
+
+      let data = { id: id, rowIndex: rowIndex };
+
+      if (kategori === 'Tahfidz') {
+        data.nama = document.getElementById('tahfidz-nama').value;
+        data.surah = document.getElementById('tahfidz-surah').value;
+        data.dariAyat = document.getElementById('tahfidz-dariAyat').value;
+        data.sampaiAyat = document.getElementById('tahfidz-sampaiAyat').value;
+        data.keterangan = document.getElementById('tahfidz-keterangan').value;
+
+        if (!data.nama || !data.surah || !data.dariAyat || !data.sampaiAyat) {
+          showToast('Mohon lengkapi semua field yang wajib diisi!', 'error');
+          return;
+        }
+      } else if (kategori === 'Kitab') {
+        data.nama = document.getElementById('kitab-nama').value;
+        data.namaKitab = document.getElementById('kitab-namaKitab').value;
+        data.jumlah = document.getElementById('kitab-jumlah').value;
+        data.keterangan = document.getElementById('kitab-keterangan').value;
+
+        if (!data.nama || !data.namaKitab || !data.jumlah) {
+          showToast('Mohon lengkapi semua field yang wajib diisi!', 'error');
+          return;
+        }
+      } else if (kategori === 'Lainnya') {
+        data.namaProgres = document.getElementById('lainnya-namaProgres').value;
+        data.nama = document.getElementById('lainnya-nama').value;
+        data.jenis = document.getElementById('lainnya-jenis').value;
+        data.keterangan = document.getElementById('lainnya-keterangan').value;
+
+        if (!data.namaProgres || !data.nama || !data.jenis) {
+          showToast('Mohon lengkapi semua field yang wajib diisi!', 'error');
+          return;
+        }
+      }
+
+      showLoading();
+
+      if (id && rowIndex) {
+        // Update
+        google.script.run
+          .withSuccessHandler(function(result) {
+            if (result.success) {
+              showToast(result.message, 'success');
+              closeModal();
+              loadData(kategori);
+              loadAllData();
+            } else {
+              showToast(result.message, 'error');
+            }
+            hideLoading();
+          })
+          .withFailureHandler(function(error) {
+            console.error('Error updating data:', error);
+            showToast('Gagal mengupdate data', 'error');
+            hideLoading();
+          })
+          .updateData(kategori, data);
+      } else {
+        // Add
+        google.script.run
+          .withSuccessHandler(function(result) {
+            if (result.success) {
+              showToast(result.message, 'success');
+              closeModal();
+              loadData(kategori);
+              loadAllData();
+            } else {
+              showToast(result.message, 'error');
+            }
+            hideLoading();
+          })
+          .withFailureHandler(function(error) {
+            console.error('Error adding data:', error);
+            showToast('Gagal menambah data', 'error');
+            hideLoading();
+          })
+          .addData(kategori, data);
+      }
+    }
+
+    // Open Delete Modal
+    function openDeleteModal(kategori, rowIndex) {
+      deleteData.kategori = kategori;
+      deleteData.rowIndex = rowIndex;
+      document.getElementById('delete-modal').classList.add('active');
+    }
+
+    // Close Delete Modal
+    function closeDeleteModal() {
+      document.getElementById('delete-modal').classList.remove('active');
+      deleteData = { kategori: null, rowIndex: null };
+    }
+
+    // Confirm Delete
+    function confirmDelete() {
+      if (!deleteData.kategori || !deleteData.rowIndex) {
+        closeDeleteModal();
+        return;
+      }
+
+      showLoading();
+
+      google.script.run
+        .withSuccessHandler(function(result) {
+          if (result.success) {
+            showToast(result.message, 'success');
+            loadData(deleteData.kategori.charAt(0).toUpperCase() + deleteData.kategori.slice(1));
+            loadAllData();
+          } else {
+            showToast(result.message, 'error');
+          }
+          hideLoading();
+          closeDeleteModal();
+        })
+        .withFailureHandler(function(error) {
+          console.error('Error deleting data:', error);
+          showToast('Gagal menghapus data', 'error');
+          hideLoading();
+          closeDeleteModal();
+        })
+        .deleteData(
+          deleteData.kategori.charAt(0).toUpperCase() + deleteData.kategori.slice(1),
+          deleteData.rowIndex
+        );
+    }
+
+    // Autocomplete
+    let autocompleteTimeout;
+    function setupAutocomplete() {
+      // Close suggestions when clicking outside
+      document.addEventListener('click', function(e) {
+        if (!e.target.closest('.autocomplete-container')) {
+          document.querySelectorAll('.autocomplete-suggestions').forEach(s => s.classList.remove('active'));
+        }
+      });
+    }
+
+    function showAutocomplete(kategori, value) {
+      clearTimeout(autocompleteTimeout);
+
+      const suggestionsEl = document.getElementById(kategori + '-suggestions');
+
+      if (!value || value.length < 1) {
+        suggestionsEl.classList.remove('active');
+        return;
+      }
+
+      autocompleteTimeout = setTimeout(function() {
+        google.script.run
+          .withSuccessHandler(function(names) {
+            if (names && names.length > 0) {
+              let html = '';
+              names.forEach(name => {
+                html += `<div class="suggestion-item" onclick="selectSuggestion('${kategori}', '${name.replace(/'/g, "\\'")}')">${name}</div>`;
+              });
+              suggestionsEl.innerHTML = html;
+              suggestionsEl.classList.add('active');
+            } else {
+              suggestionsEl.classList.remove('active');
+            }
+          })
+          .withFailureHandler(function(error) {
+            console.error('Error loading autocomplete:', error);
+            // Silent fail for autocomplete
+          })
+          .filterNamaByPrefix(kategori.charAt(0).toUpperCase() + kategori.slice(1), value);
+      }, 300);
+    }
+
+    function selectSuggestion(kategori, name) {
+      document.getElementById(kategori + '-nama').value = name;
+      document.getElementById(kategori + '-suggestions').classList.remove('active');
+    }
+
+    // Print Data
+    function printData(kategori) {
+      showLoading();
+      google.script.run
+        .withSuccessHandler(function(html) {
+          const printWindow = window.open('', '_blank');
+          printWindow.document.write(html);
+          printWindow.document.close();
+          hideLoading();
+        })
+        .withFailureHandler(function(error) {
+          console.error('Error generating print:', error);
+          showToast('Gagal membuat laporan cetak', 'error');
+          hideLoading();
+        })
+        .printData(kategori);
+    }
+
+    // Toast Notification
+    function showToast(message, type = 'success') {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = 'toast ' + type + ' show';
+
+      setTimeout(function() {
+        toast.classList.remove('show');
+      }, 3000);
+    }
+  </script>
 </body>
 </html>
