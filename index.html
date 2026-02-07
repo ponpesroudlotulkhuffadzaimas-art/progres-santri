@@ -2,122 +2,162 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Progres Santri</title>
 
 <style>
-body{font-family:Arial;background:#f3f4f6;margin:10px}
+body{font-family:Arial;background:#f1f5f9;margin:10px}
 h2{text-align:center}
+.card{background:#fff;padding:12px;border-radius:10px;box-shadow:0 2px 4px rgba(0,0,0,.1)}
 input,select,textarea,button{
-  width:100%;padding:8px;margin:5px 0;
-  border-radius:6px;border:1px solid #ccc;font-size:14px
+  width:100%;padding:8px;margin:6px 0;border-radius:6px;border:1px solid #ccc;font-size:14px
 }
-button{background:#1e40af;color:#fff;border:none}
-table{width:100%;border-collapse:collapse;background:#fff;margin-top:10px}
+button{background:#1e40af;color:#fff;border:none;font-weight:bold}
+table{width:100%;border-collapse:collapse;margin-top:10px;background:#fff}
 th,td{border:1px solid #ccc;padding:6px;text-align:center}
 th{background:#1e40af;color:#fff}
 </style>
 
 <script>
-const API = "URL_APPS_SCRIPT_ANDA";
+const API = "URL_API_ANDA";
 let kategori = "Tahfidz";
 
 function setKategori(v){
   kategori = v;
+  tampilForm();
   loadData();
+}
+
+function tampilForm(){
+  document.getElementById("formTahfidz").style.display = kategori==="Tahfidz"?"block":"none";
+  document.getElementById("formKitab").style.display   = kategori==="Kitab"?"block":"none";
+  document.getElementById("formLain").style.display    = kategori==="Lainnya"?"block":"none";
 }
 
 function loadData(){
   fetch(`${API}?action=get&kategori=${kategori}`)
     .then(r=>r.json())
-    .then(tampil)
+    .then(tampilTabel)
     .catch(()=>alert("Gagal mengambil data"));
 }
 
-function tampil(data){
-  let html = "<tr>";
+function tampilTabel(data){
+  let html="<tr>";
+
   if(!data.length){
     document.getElementById("tabel").innerHTML="<tr><td>Data kosong</td></tr>";
     return;
   }
 
-  Object.keys(data[0]).filter(x=>x!="rowIndex").forEach(h=>{
-    html+=`<th>${h}</th>`;
-  });
+  Object.keys(data[0]).filter(x=>x!="rowIndex").forEach(h=>html+=`<th>${h}</th>`);
   html+="<th>Aksi</th></tr>";
 
   data.forEach(r=>{
     html+="<tr>";
-    Object.keys(r).filter(x=>x!="rowIndex").forEach(k=>{
-      html+=`<td>${r[k]}</td>`;
-    });
+    Object.keys(r).filter(x=>x!="rowIndex").forEach(k=>html+=`<td>${r[k]}</td>`);
     html+=`<td><button onclick="hapus(${r.rowIndex})">Hapus</button></td></tr>`;
   });
 
   document.getElementById("tabel").innerHTML=html;
 }
 
-function simpan(){
-  let q = `?action=add&kategori=${kategori}`+
-          `&nama=${val("nama")}`+
-          `&surah=${val("surah")}`+
-          `&dariAyat=${val("dari")}`+
-          `&sampaiAyat=${val("sampai")}`+
-          `&namaKitab=${val("kitab")}`+
-          `&jumlah=${val("jumlah")}`+
-          `&namaProgres=${val("progres")}`+
-          `&jenis=${val("jenis")}`+
-          `&keterangan=${val("ket")}`;
+function simpanTahfidz(){
+  let q = `?action=add&kategori=Tahfidz`+
+    `&nama=${v("t_nama")}`+
+    `&surah=${v("t_surah")}`+
+    `&dariAyat=${v("t_dari")}`+
+    `&sampaiAyat=${v("t_sampai")}`+
+    `&keterangan=${v("t_ket")}`;
 
+  kirim(q);
+}
+
+function simpanKitab(){
+  let q = `?action=add&kategori=Kitab`+
+    `&nama=${v("k_nama")}`+
+    `&namaKitab=${v("k_kitab")}`+
+    `&jumlah=${v("k_jumlah")}`+
+    `&keterangan=${v("k_ket")}`;
+
+  kirim(q);
+}
+
+function simpanLain(){
+  let q = `?action=add&kategori=Lainnya`+
+    `&namaProgres=${v("l_progres")}`+
+    `&nama=${v("l_nama")}`+
+    `&jenis=${v("l_jenis")}`+
+    `&keterangan=${v("l_ket")}`;
+
+  kirim(q);
+}
+
+function kirim(q){
   fetch(API+q)
     .then(r=>r.json())
     .then(res=>{
       alert(res.message || "Data tersimpan");
       loadData();
     })
-    .catch(()=>alert("Gagal simpan data"));
+    .catch(()=>alert("Gagal menyimpan data"));
 }
 
 function hapus(row){
-  if(!confirm("Hapus data ini?")) return;
+  if(!confirm("Hapus data?")) return;
   fetch(`${API}?action=delete&kategori=${kategori}&row=${row}`)
     .then(r=>r.json())
     .then(()=>loadData());
 }
 
-function val(id){
-  return encodeURIComponent(document.getElementById(id).value);
-}
+function v(id){ return encodeURIComponent(document.getElementById(id).value); }
 
-window.onload=loadData;
+window.onload = () => {
+  tampilForm();
+  loadData();
+}
 </script>
 
 </head>
 <body>
 
-<h2>📘 Progres Santri</h2>
+<h2>📘 PROGRES SANTRI</h2>
 
+<div class="card">
 <select onchange="setKategori(this.value)">
   <option value="Tahfidz">Tahfidz</option>
   <option value="Kitab">Kitab</option>
   <option value="Lainnya">Lainnya</option>
 </select>
 
-<input id="nama" placeholder="Nama Santri">
+<!-- FORM TAHFIDZ -->
+<div id="formTahfidz">
+  <input id="t_nama" placeholder="Nama Santri">
+  <input id="t_surah" placeholder="Surah">
+  <input id="t_dari" placeholder="Dari Ayat">
+  <input id="t_sampai" placeholder="Sampai Ayat">
+  <textarea id="t_ket" placeholder="Keterangan"></textarea>
+  <button onclick="simpanTahfidz()">Simpan Tahfidz</button>
+</div>
 
-<input id="surah" placeholder="Surah">
-<input id="dari" placeholder="Dari Ayat">
-<input id="sampai" placeholder="Sampai Ayat">
+<!-- FORM KITAB -->
+<div id="formKitab" style="display:none">
+  <input id="k_nama" placeholder="Nama Santri">
+  <input id="k_kitab" placeholder="Nama Kitab">
+  <input id="k_jumlah" placeholder="Jumlah">
+  <textarea id="k_ket" placeholder="Keterangan"></textarea>
+  <button onclick="simpanKitab()">Simpan Kitab</button>
+</div>
 
-<input id="kitab" placeholder="Nama Kitab">
-<input id="jumlah" placeholder="Jumlah">
+<!-- FORM LAINNYA -->
+<div id="formLain" style="display:none">
+  <input id="l_progres" placeholder="Nama Progres">
+  <input id="l_nama" placeholder="Nama Santri">
+  <input id="l_jenis" placeholder="Jenis">
+  <textarea id="l_ket" placeholder="Keterangan"></textarea>
+  <button onclick="simpanLain()">Simpan Lainnya</button>
+</div>
 
-<input id="progres" placeholder="Nama Progres">
-<input id="jenis" placeholder="Jenis">
-
-<textarea id="ket" placeholder="Keterangan"></textarea>
-
-<button onclick="simpan()">💾 Simpan</button>
+</div>
 
 <table>
 <tbody id="tabel"></tbody>
