@@ -1,70 +1,50 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Progres Santri</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Progres Santri</title>
 
-  <style>
-    body{font-family:Arial;margin:10px;background:#f3f4f6}
-    h2{text-align:center}
-    input,select,textarea,button{
-      width:100%;
-      padding:8px;
-      margin:5px 0;
-      border-radius:6px;
-      border:1px solid #ccc;
-      font-size:14px;
-    }
-    button{
-      background:#1e40af;
-      color:white;
-      border:none;
-      cursor:pointer;
-    }
-    button:hover{opacity:.9}
-    table{
-      width:100%;
-      border-collapse:collapse;
-      background:white;
-      margin-top:10px;
-    }
-    th,td{
-      border:1px solid #ccc;
-      padding:6px;
-      text-align:center;
-    }
-    th{background:#1e40af;color:white}
-  </style>
+<style>
+body{font-family:Arial;background:#f3f4f6;margin:10px}
+h2{text-align:center}
+input,select,textarea,button{
+  width:100%;padding:8px;margin:5px 0;
+  border-radius:6px;border:1px solid #ccc;font-size:14px
+}
+button{background:#1e40af;color:#fff;border:none}
+table{width:100%;border-collapse:collapse;background:#fff;margin-top:10px}
+th,td{border:1px solid #ccc;padding:6px;text-align:center}
+th{background:#1e40af;color:#fff}
+</style>
 
 <script>
-const API = "https://script.google.com/macros/s/AKfycbxMAnqlTJlKF_42jAPFw8hqXUx6rHPGA_wOWY3X9dE--00Al1R91SwQyIrOEOSB5gd3/exec";
-
+const API = "URL_APPS_SCRIPT_ANDA";
 let kategori = "Tahfidz";
 
-function setKategori(k){
-  kategori = k;
+function setKategori(v){
+  kategori = v;
   loadData();
 }
 
 function loadData(){
   fetch(`${API}?action=get&kategori=${kategori}`)
     .then(r=>r.json())
-    .then(showData)
-    .catch(e=>alert("Gagal ambil data"));
+    .then(tampil)
+    .catch(()=>alert("Gagal mengambil data"));
 }
 
-function showData(data){
+function tampil(data){
   let html = "<tr>";
   if(!data.length){
-    document.getElementById("tabel").innerHTML = "<tr><td>Data kosong</td></tr>";
+    document.getElementById("tabel").innerHTML="<tr><td>Data kosong</td></tr>";
     return;
   }
 
   Object.keys(data[0]).filter(x=>x!="rowIndex").forEach(h=>{
-    html += `<th>${h}</th>`;
+    html+=`<th>${h}</th>`;
   });
-  html += "<th>Aksi</th></tr>";
+  html+="<th>Aksi</th></tr>";
 
   data.forEach(r=>{
     html+="<tr>";
@@ -74,44 +54,39 @@ function showData(data){
     html+=`<td><button onclick="hapus(${r.rowIndex})">Hapus</button></td></tr>`;
   });
 
-  document.getElementById("tabel").innerHTML = html;
+  document.getElementById("tabel").innerHTML=html;
 }
 
 function simpan(){
-  let data = {
-    kategori:kategori,
-    nama:val("nama"),
-    surah:val("surah"),
-    dariAyat:val("dari"),
-    sampaiAyat:val("sampai"),
-    namaKitab:val("kitab"),
-    jumlah:val("jumlah"),
-    namaProgres:val("progres"),
-    jenis:val("jenis"),
-    keterangan:val("ket")
-  };
+  let q = `?action=add&kategori=${kategori}`+
+          `&nama=${val("nama")}`+
+          `&surah=${val("surah")}`+
+          `&dariAyat=${val("dari")}`+
+          `&sampaiAyat=${val("sampai")}`+
+          `&namaKitab=${val("kitab")}`+
+          `&jumlah=${val("jumlah")}`+
+          `&namaProgres=${val("progres")}`+
+          `&jenis=${val("jenis")}`+
+          `&keterangan=${val("ket")}`;
 
-  fetch(API+"?action=add",{
-    method:"POST",
-    body:JSON.stringify(data)
-  })
-  .then(r=>r.json())
-  .then(res=>{
-    alert(res.message || "Tersimpan");
-    loadData();
-  })
-  .catch(()=>alert("Gagal simpan data"));
+  fetch(API+q)
+    .then(r=>r.json())
+    .then(res=>{
+      alert(res.message || "Data tersimpan");
+      loadData();
+    })
+    .catch(()=>alert("Gagal simpan data"));
 }
 
 function hapus(row){
-  if(!confirm("Hapus data?")) return;
+  if(!confirm("Hapus data ini?")) return;
   fetch(`${API}?action=delete&kategori=${kategori}&row=${row}`)
     .then(r=>r.json())
     .then(()=>loadData());
 }
 
 function val(id){
-  return document.getElementById(id).value;
+  return encodeURIComponent(document.getElementById(id).value);
 }
 
 window.onload=loadData;
@@ -130,28 +105,22 @@ window.onload=loadData;
 
 <input id="nama" placeholder="Nama Santri">
 
-<div id="tahfidz">
-  <input id="surah" placeholder="Surah">
-  <input id="dari" placeholder="Dari Ayat">
-  <input id="sampai" placeholder="Sampai Ayat">
-</div>
+<input id="surah" placeholder="Surah">
+<input id="dari" placeholder="Dari Ayat">
+<input id="sampai" placeholder="Sampai Ayat">
 
-<div id="kitab">
-  <input id="kitab" placeholder="Nama Kitab">
-  <input id="jumlah" placeholder="Jumlah">
-</div>
+<input id="kitab" placeholder="Nama Kitab">
+<input id="jumlah" placeholder="Jumlah">
 
-<div id="lainnya">
-  <input id="progres" placeholder="Nama Progres">
-  <input id="jenis" placeholder="Jenis">
-</div>
+<input id="progres" placeholder="Nama Progres">
+<input id="jenis" placeholder="Jenis">
 
 <textarea id="ket" placeholder="Keterangan"></textarea>
 
 <button onclick="simpan()">💾 Simpan</button>
 
 <table>
-  <tbody id="tabel"></tbody>
+<tbody id="tabel"></tbody>
 </table>
 
 </body>
