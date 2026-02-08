@@ -1,143 +1,170 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Progres Santri</title>
-
-<style>
-body{font-family:Arial;background:#f5f5f5;margin:0}
-header{background:#1e88e5;color:white;padding:12px;text-align:center}
-.container{padding:15px}
-input,select,button{width:100%;padding:10px;margin-top:5px;margin-bottom:10px;font-size:15px}
-button{background:#1e88e5;color:white;border:none;border-radius:5px}
-table{width:100%;border-collapse:collapse;margin-top:10px;background:white}
-th,td{border:1px solid #ccc;padding:6px;font-size:13px;text-align:center}
-th{background:#1976d2;color:white}
-.loading{display:none;text-align:center;padding:10px}
-</style>
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Monitoring Santri</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body { background-color: #f4f7f6; font-family: 'Inter', sans-serif; color: #333; }
+        .app-header { background: #1e40af; color: white; padding: 20px; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .nav-pills .nav-link { color: #666; font-weight: 600; border-radius: 10px; }
+        .nav-pills .nav-link.active { background-color: #1e40af; }
+        .card-custom { border: none; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: 0.3s; }
+        .btn-save { background: #1e40af; color: white; border-radius: 12px; padding: 12px; font-weight: 600; border: none; width: 100%; }
+        .btn-save:disabled { background: #94a3b8; }
+        .data-card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 12px; border-left: 5px solid #1e40af; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    </style>
 </head>
-
 <body>
 
-<header>
-<h3>Catatan Progres Santri</h3>
-</header>
+<div class="app-header text-center">
+    <h4 class="mb-0">Progres Santri</h4>
+    <small id="stat-santri">Memuat statistik...</small>
+</div>
 
 <div class="container">
+    <ul class="nav nav-pills nav-fill mb-4 bg-white p-1 rounded-3 shadow-sm">
+        <li class="nav-item"><a class="nav-link active" href="#" onclick="switchTab('Tahfidz')">Tahfidz</a></li>
+        <li class="nav-item"><a class="nav-link" href="#" onclick="switchTab('Kitab')">Kitab</a></li>
+        <li class="nav-item"><a class="nav-link" href="#" onclick="switchTab('Lainnya')">Lainnya</a></li>
+    </ul>
 
-<div class="loading" id="loading">⏳ Memuat data...</div>
+    <div class="card card-custom p-4 mb-4 bg-white">
+        <h6 class="fw-bold mb-3">Input Data Baru</h6>
+        <div id="dynamicForm">
+            </div>
+        <button id="btnSubmit" onclick="submitData()" class="btn btn-save mt-3">Simpan Sekarang</button>
+    </div>
 
-<input type="text" id="nama" placeholder="Nama Santri">
-<select id="kelas">
-<option value="">Pilih Kelas</option>
-<option>1</option>
-<option>2</option>
-<option>3</option>
-<option>4</option>
-<option>5</option>
-<option>6</option>
-</select>
-<input type="text" id="hafalan" placeholder="Hafalan / Progres">
-
-<button onclick="simpan()">Simpan</button>
-
-<table>
-<thead>
-<tr>
-<th>No</th>
-<th>Nama</th>
-<th>Kelas</th>
-<th>Progres</th>
-<th>Tanggal</th>
-</tr>
-</thead>
-<tbody id="data"></tbody>
-</table>
-
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h6 class="fw-bold mb-0">Riwayat Progres</h6>
+        <button class="btn btn-sm btn-light" onclick="fetchData()">🔄 Refresh</button>
+    </div>
+    
+    <div id="loader" class="text-center my-4 d-none">
+        <div class="spinner-border text-primary" role="status"></div>
+    </div>
+    
+    <div id="listContainer"></div>
 </div>
 
 <script>
+    const API_URL = "URL_WEB_APP_ANDA"; // GANTI DENGAN URL DEPLOYMENT APPS SCRIPT ANDA
+    let currentTab = 'Tahfidz';
 
-const URL_API = "GANTI_DENGAN_URL_WEB_APP_ANDA";
-
-function showLoading(v){
-  document.getElementById('loading').style.display = v ? 'block' : 'none';
-}
-
-async function loadData(){
-  showLoading(true);
-  try{
-    const res = await fetch(URL_API + "?action=get");
-    const json = await res.json();
-
-    let html = "";
-    json.data.forEach((d,i)=>{
-      html += `<tr>
-        <td>${i+1}</td>
-        <td>${d.nama}</td>
-        <td>${d.kelas}</td>
-        <td>${d.hafalan}</td>
-        <td>${d.tanggal}</td>
-      </tr>`;
-    });
-
-    document.getElementById('data').innerHTML = html;
-  }catch(e){
-    alert("Gagal mengambil data");
-    console.error(e);
-  }
-  showLoading(false);
-}
-
-async function simpan(){
-  const nama = document.getElementById("nama").value;
-  const kelas = document.getElementById("kelas").value;
-  const hafalan = document.getElementById("hafalan").value;
-
-  if(!nama || !kelas || !hafalan){
-    alert("Lengkapi data!");
-    return;
-  }
-
-  showLoading(true);
-
-  try{
-    const res = await fetch(URL_API, {
-      method: "POST",
-      headers: {"Content-Type":"application/json"},
-      body: JSON.stringify({
-        action: "add",
-        nama: nama,
-        kelas: kelas,
-        hafalan: hafalan
-      })
-    });
-
-    const json = await res.json();
-
-    if(json.status=="OK"){
-      alert("Data berhasil disimpan");
-      document.getElementById("nama").value="";
-      document.getElementById("kelas").value="";
-      document.getElementById("hafalan").value="";
-      loadData();
-    }else{
-      alert("Gagal menyimpan");
+    function switchTab(tab) {
+        currentTab = tab;
+        document.querySelectorAll('.nav-link').forEach(el => {
+            el.classList.toggle('active', el.innerText === tab);
+        });
+        renderForm();
+        fetchData();
     }
 
-  }catch(e){
-    alert("Error simpan data");
-    console.error(e);
-  }
+    function renderForm() {
+        const form = document.getElementById('dynamicForm');
+        let html = `<input type="text" id="nama" class="form-control mb-3" placeholder="Nama Santri" required>`;
+        
+        if (currentTab === 'Tahfidz') {
+            html += `
+                <input type="text" id="surah" class="form-control mb-3" placeholder="Nama Surah">
+                <div class="row g-2">
+                    <div class="col"><input type="number" id="dariAyat" class="form-control" placeholder="Dari Ayat"></div>
+                    <div class="col"><input type="number" id="sampaiAyat" class="form-control" placeholder="Ke Ayat"></div>
+                </div>`;
+        } else if (currentTab === 'Kitab') {
+            html += `
+                <input type="text" id="namaKitab" class="form-control mb-3" placeholder="Nama Kitab">
+                <input type="number" id="jumlah" class="form-control mb-3" placeholder="Jumlah Bait/Halaman">`;
+        } else {
+            html += `
+                <input type="text" id="namaProgres" class="form-control mb-3" placeholder="Nama Progres">
+                <input type="text" id="jenis" class="form-control mb-3" placeholder="Jenis (Misal: Doa)">`;
+        }
+        html += `<textarea id="keterangan" class="form-control mt-3" placeholder="Keterangan (Opsional)"></textarea>`;
+        form.innerHTML = html;
+    }
 
-  showLoading(false);
-}
+    async function fetchData() {
+        const list = document.getElementById('listContainer');
+        const loader = document.getElementById('loader');
+        list.innerHTML = '';
+        loader.classList.remove('d-none');
 
-loadData();
+        try {
+            const res = await fetch(`${API_URL}?action=read&kategori=${currentTab}`);
+            const data = await res.json();
+            loader.classList.add('d-none');
 
+            data.reverse().slice(0, 15).forEach(item => {
+                let detail = currentTab === 'Tahfidz' ? `${item.Surah} (Ayat ${item['Dari Ayat']}-${item['Sampai Ayat']})` : 
+                             currentTab === 'Kitab' ? `${item['Nama Kitab']} - ${item['Jumlah Bait/Halaman']} Hal` :
+                             `${item['Nama Progres']} (${item.Jenis})`;
+                
+                list.innerHTML += `
+                    <div class="data-card">
+                        <div class="fw-bold text-primary">${item.Nama}</div>
+                        <div class="small fw-semibold text-dark">${detail}</div>
+                        <div class="small text-muted italic">${item.Keterangan || ''}</div>
+                    </div>`;
+            });
+        } catch (e) {
+            loader.innerHTML = "Gagal memuat data. Periksa koneksi/URL.";
+        }
+    }
+
+    async function submitData() {
+        const btn = document.getElementById('btnSubmit');
+        const payload = {
+            action: 'add',
+            kategori: currentTab,
+            data: {
+                nama: document.getElementById('nama').value,
+                keterangan: document.getElementById('keterangan').value
+            }
+        };
+
+        // Mapping field
+        if (currentTab === 'Tahfidz') {
+            payload.data.surah = document.getElementById('surah').value;
+            payload.data.dariAyat = document.getElementById('dariAyat').value;
+            payload.data.sampaiAyat = document.getElementById('sampaiAyat').value;
+        } else if (currentTab === 'Kitab') {
+            payload.data.namaKitab = document.getElementById('namaKitab').value;
+            payload.data.jumlah = document.getElementById('jumlah').value;
+        } else {
+            payload.data.namaProgres = document.getElementById('namaProgres').value;
+            payload.data.jenis = document.getElementById('jenis').value;
+        }
+
+        if (!payload.data.nama) return alert("Nama harus diisi!");
+
+        btn.disabled = true;
+        btn.innerText = "Mengirim...";
+
+        try {
+            await fetch(API_URL, {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            });
+            alert("✅ Berhasil disimpan!");
+            renderForm();
+            fetchData();
+        } catch (e) {
+            alert("❌ Gagal menyimpan.");
+        } finally {
+            btn.disabled = false;
+            btn.innerText = "Simpan Sekarang";
+        }
+    }
+
+    // Inisialisasi
+    window.onload = () => {
+        renderForm();
+        fetchData();
+    };
 </script>
-
 </body>
 </html>
